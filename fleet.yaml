@@ -4,7 +4,7 @@ targets:
 - name: local
   clusterSelector:
     matchLabels:
-      env: production
+      name: local
 helm:
   chart: erpnext
   repo: https://helm.erpnext.com
