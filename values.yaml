@@ -31,7 +31,7 @@ persistence:
   worker:
     enabled: true
     size: 10Gi
-    accessMode: ReadWriteMany  # Allows pod to move between nodes
+    accessMode: ReadWriteOnce  # Changed from ReadWriteMany for local-path compatibility
     # storageClass: "nfs-client"  # Use shared storage if available
   logs:
     enabled: false
@@ -89,8 +89,8 @@ resources:
     cpu: 200m      # Lower requests for better scheduling
     memory: 512Mi
 
-# Multiple replicas for HA and pod mobility
-replicaCount: 2  # Allows one pod per worker node
+# Single replica due to ReadWriteOnce volume limitation
+replicaCount: 1  # Changed from 2 due to ReadWriteOnce volume constraints
 
 # Auto-create a test site
 jobs:
