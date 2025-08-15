@@ -1,0 +1,10 @@
+defaultNamespace: erpnext
+
+helm:
+  repo: https://helm.erpnext.com
+  chart: erpnext
+  version: "7.0.205"
+  valuesFiles:
+    - values.yaml
+  releaseName: erpnext-test
+

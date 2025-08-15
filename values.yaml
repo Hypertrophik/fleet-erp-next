@@ -1,0 +1,139 @@
+# values.yaml - Optimized for testing/development
+image:
+  repository: frappe/erpnext
+  tag: "v15.65.1"
+  pullPolicy: IfNotPresent
+
+# Simple MariaDB setup for testing
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "testpassword123"
+    username: "erpnext"
+    password: "erpnext123"
+    database: "erpnext"
+  
+  primary:
+    configuration: |-
+      [mysqld]
+      character-set-client-handshake = FALSE
+      character-set-server = utf8mb4
+      collation-server = utf8mb4_unicode_ci
+
+# Redis - simple setup
+redis:
+  enabled: true
+  auth:
+    enabled: false
+
+# Storage with proper access modes for mobility
+persistence:
+  worker:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteMany  # Allows pod to move between nodes
+    # storageClass: "nfs-client"  # Use shared storage if available
+  logs:
+    enabled: false
+
+# Database configuration for HA
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "testpassword123"
+    username: "erpnext"
+    password: "erpnext123"
+    database: "erpnext"
+  
+  primary:
+    configuration: |-
+      [mysqld]
+      character-set-client-handshake = FALSE
+      character-set-server = utf8mb4
+      collation-server = utf8mb4_unicode_ci
+    
+    # MariaDB pod scheduling
+    nodeSelector: {}
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: mariadb
+            topologyKey: kubernetes.io/hostname
+    
+    # MariaDB persistence
+    persistence:
+      enabled: true
+      size: 8Gi
+      accessModes:
+        - ReadWriteOnce  # Database can use RWO
+
+# Simple service
+service:
+  type: ClusterIP
+  port: 8000
+
+# No ingress for testing - use port-forward
+ingress:
+  enabled: false
+
+# Resources optimized for 8GB nodes
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1.5Gi  # Leave headroom for other pods
+  requests:
+    cpu: 200m      # Lower requests for better scheduling
+    memory: 512Mi
+
+# Multiple replicas for HA and pod mobility
+replicaCount: 2  # Allows one pod per worker node
+
+# Auto-create a test site
+jobs:
+  createSite:
+    enabled: true
+    siteName: "erpnext-test.local"
+    adminPassword: "admin123"
+
+# Pod scheduling and availability settings
+nodeSelector: {}  # Let it schedule on any worker node
+tolerations: []
+
+# Ensure pods spread across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - erpnext
+        topologyKey: kubernetes.io/hostname
+
+# Graceful shutdown for maintenance
+terminationGracePeriodSeconds: 60
+
+# Pod disruption budget for maintenance
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1  # Always keep at least 1 pod running
+
+# Rolling update strategy
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+  worker:
+    replicaCount: 1
+  socketio:
+    replicaCount: 1
+  scheduler:
+    replicaCount: 1
