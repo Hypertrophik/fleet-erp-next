@@ -19,6 +19,3 @@ targetCustomizations:
     valuesFiles:
     - helm/values.yaml
     - helm/values-production.yaml
-  clusterSelector:
-    matchLabels:
-      env: production
