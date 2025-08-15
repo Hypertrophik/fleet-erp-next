@@ -1,0 +1,76 @@
+---
+image:
+  repository: frappe/erpnext
+  tag: v15.67.0
+  pullPolicy: IfNotPresent
+
+# Configure for k3s cluster
+persistence:
+  worker:
+    storageClass: "local-path"
+    size: 20Gi
+  logs:
+    storageClass: "local-path"
+    size: 5Gi
+
+# Built-in MariaDB (disable for production)
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "changeme-dev"
+    database: "erpnext"
+  primary:
+    persistence:
+      storageClass: "local-path"
+      size: 10Gi
+
+# Redis configuration (built-in)
+redis-cache:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+redis-queue:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+# Resource limits for your 4-node 8GB cluster
+worker:
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+nginx:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# Auto-create site (disabled by default, enable in production)
+jobs:
+  createSite:
+    enabled: false
+    siteName: "erpnext.stefenallen.com"
+    adminPassword: "admin"
+
+# Ingress disabled by default
+ingress:
+  enabled: false

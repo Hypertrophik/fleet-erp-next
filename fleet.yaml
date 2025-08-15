@@ -1,10 +1,24 @@
+---
 defaultNamespace: erpnext
-
+targets:
+- name: local
+  clusterSelector:
+    matchLabels:
+      env: production
 helm:
-  repo: https://helm.erpnext.com
   chart: erpnext
+  repo: https://helm.erpnext.com
   version: "7.0.205"
+  releaseName: frappe-bench
   valuesFiles:
-    - values.yaml
-  releaseName: erpnext-test
-
+  - helm/values.yaml
+  timeoutSeconds: 600
+targetCustomizations:
+- name: production
+  helm:
+    valuesFiles:
+    - helm/values.yaml
+    - helm/values-production.yaml
+  clusterSelector:
+    matchLabels:
+      env: production
